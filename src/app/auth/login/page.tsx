@@ -1,8 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Brain, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react'
+
+import { useState, useContext } from 'react'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/navigation'
+import { AuthContext } from '@/context/AuthContext'
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -10,57 +15,66 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{email?: string, password?: string, general?: string}>({})
+  const router = useRouter()
+  
+  const { login } = useContext(AuthContext)
+
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setErrors({})
-    setIsLoading(true)
+ 
+ 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setErrors({});
+  setIsLoading(true);
 
-    // Validation
-    const newErrors: {email?: string, password?: string} = {}
-    
-    if (!email) {
-      newErrors.email = 'L\'email est requis'
-    } else if (!validateEmail(email)) {
-      newErrors.email = 'Format d\'email invalide'
-    }
+  const newErrors: { email?: string; password?: string; general?: string } = {};
 
-    if (!password) {
-      newErrors.password = 'Le mot de passe est requis'
-    } else if (password.length < 6) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères'
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      setIsLoading(false)
-      return
-    }
-
-    // Simulation de connexion
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      // Redirection vers dashboard
-      window.location.href = '/dashboard'
-    } catch (error) {
-      setErrors({ general: 'Erreur de connexion. Veuillez réessayer.' })
-    } finally {
-      setIsLoading(false)
-    }
+  // 🧾 Validation de base
+  if (!email) {
+    newErrors.email = "L'email est requis";
+  } else if (!validateEmail(email)) {
+    newErrors.email = "Format d'email invalide";
   }
 
-  const handleSocialLogin = (provider: 'google' | 'apple') => {
-    setIsLoading(true)
-    // Simulation de connexion sociale
-    setTimeout(() => {
-      window.location.href = '/dashboard'
-    }, 1000)
+  if (!password) {
+    newErrors.password = 'Le mot de passe est requis';
+  } else if (password.length < 6) {
+    newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
   }
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    // ✅ Appel direct au contexte d'authentification
+    await login(email, password);
+    // Le `login()` du AuthContext :
+    // - fait le fetch vers /api/login
+    // - met à jour le user et isAuthenticated
+    // - affiche le toast de succès
+    // - redirige automatiquement vers /dashboard
+  } catch (error) {
+    console.error('Erreur de connexion', error);
+    setErrors({ general: 'Erreur lors de la connexion au serveur' });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+  const handleGoogleLogin = () => {
+    window.location.href = "${process.env.APP_API_URL}/connect/google";
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
@@ -68,29 +82,25 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-7 h-7 text-white" />
+            <div className="w-100 h-10 rounded-xl overflow-hidden">
+              <img src="/logo-octagy.png" alt="Logo" className="w-52 h-16 object-cover" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                KNO.ACADEMY
-              </h1>
-              <p className="text-sm text-gray-500">Learn to Earn</p>
-            </div>
+
           </Link>
+      
         </div>
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h2>
-            <p className="text-gray-600">Accédez à votre compte KNO.ACADEMY</p>
+            <p className="text-gray-600">Accédez à votre compte OCTAGY</p>
           </div>
 
           {/* Social Login */}
           <div className="space-y-3 mb-6">
             <button
-              onClick={() => handleSocialLogin('google')}
+              onClick={handleGoogleLogin}
               disabled={isLoading}
               className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -104,7 +114,10 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handleSocialLogin('apple')}
+             onClick={() => {
+    const redirectUri = encodeURIComponent('${process.env.APP_API_URL}/connect/apple/check');
+    window.location.href = `${process.env.APP_API_URL}/connect/apple?client=web&redirect_uri=${redirectUri}`;
+  }}
               disabled={isLoading}
               className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -196,7 +209,7 @@ export default function LoginPage() {
                 <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
                 <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
               </label>
-              <Link href="/auth/forgot-password" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -204,7 +217,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white py-3 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -217,7 +230,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Pas encore de compte ?{' '}
-              <Link href="/auth/register" className="text-purple-600 hover:text-purple-700 font-semibold">
+              <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-semibold">
                 S'inscrire
               </Link>
             </p>
@@ -226,7 +239,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-500">
-          <p>© 2025 Knowledge Process SA. Tous droits réservés.</p>
+          <p>© 2025 OCTAGY. Tous droits réservés.</p>
         </div>
       </div>
     </div>

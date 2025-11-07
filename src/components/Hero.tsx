@@ -42,7 +42,7 @@ export function Hero() {
                 }`}
               >
                 <GraduationCap className="w-5 h-5" />
-                <span>Étudiants</span>
+                <span>Apprenants</span>
               </button>
               <button
                 onClick={() => setActiveAudience('business')}

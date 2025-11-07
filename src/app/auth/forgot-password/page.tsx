@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Brain, Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -15,33 +16,34 @@ export default function ForgotPasswordPage() {
     return emailRegex.test(email)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+  const handleResetPasswordRequest = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
 
     if (!email) {
-      setError('L\'email est requis')
-      setIsLoading(false)
-      return
+      toast.error("Veuillez saisir votre email.");
+      return;
     }
 
-    if (!validateEmail(email)) {
-      setError('Format d\'email invalide')
-      setIsLoading(false)
-      return
-    }
-
-    // Simulation d'envoi d'email
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setIsEmailSent(true)
+      const res = await fetch('${process.env.APP_API_URL}/reset-password/request', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message || "Lien de réinitialisation envoyé.");
+        setEmail("");
+      } else {
+        toast.error(data.error || "Une erreur est survenue.");
+      }
     } catch (error) {
-      setError('Erreur lors de l\'envoi. Veuillez réessayer.')
-    } finally {
-      setIsLoading(false)
+      toast.error("Erreur de connexion au serveur.");
+      console.error(error);
     }
-  }
+  };
 
   if (isEmailSent) {
     return (
@@ -50,14 +52,9 @@ export default function ForgotPasswordPage() {
           {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  KNO.ACADEMY
-                </h1>
-                <p className="text-sm text-gray-500">Learn to Earn</p>
+              <div className="w-100 h-10 rounded-xl overflow-hidden">
+                <img src="/logo-octagy.png" alt="Logo" className="w-52 h-16 object-cover" />
+                
               </div>
             </Link>
           </div>
@@ -112,15 +109,10 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                KNO.ACADEMY
-              </h1>
-              <p className="text-sm text-gray-500">Learn to Earn</p>
-            </div>
+            <div className="w-100 h-10 rounded-xl overflow-hidden">
+  <img src="/logo-octagy.png" alt="Logo" className="w-52 h-16 object-cover" />
+  
+</div>
           </Link>
         </div>
 
@@ -129,7 +121,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-6">
             <Link
               href="/auth/login"
-              className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium mb-4"
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-4"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour à la connexion
@@ -150,7 +142,7 @@ export default function ForgotPasswordPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleResetPasswordRequest} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                 Adresse email
@@ -173,7 +165,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white py-3 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -186,7 +178,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Vous vous souvenez de votre mot de passe ?{' '}
-              <Link href="/auth/login" className="text-purple-600 hover:text-purple-700 font-semibold">
+              <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold">
                 Se connecter
               </Link>
             </p>
@@ -195,7 +187,7 @@ export default function ForgotPasswordPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-500">
-          <p>© 2025 Knowledge Process SA. Tous droits réservés.</p>
+          <p>© 2025 OCTAGY. Tous droits réservés.</p>
         </div>
       </div>
     </div>

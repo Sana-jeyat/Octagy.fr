@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Play, Youtube, Instagram, Facebook, MessageCircle, Target, Trophy, Zap, Clock, Star, CheckCircle, ArrowRight, BookOpen, Coins } from 'lucide-react'
 import { Shield } from 'lucide-react'
+import Chatbot from './Chatbot'
 
 export function LearnToEarn() {
   const [activeStep, setActiveStep] = useState(0)
@@ -81,7 +82,7 @@ export function LearnToEarn() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <><section className="py-24 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">
@@ -91,7 +92,7 @@ export function LearnToEarn() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 leading-relaxed">
-            Regarde des contenus éducatifs, valide par un quiz rapide, gagne des rewards. 
+            Regarde des contenus éducatifs, valide par un quiz rapide, gagne des rewards.
             <strong className="text-purple-600">Simple et addictif !</strong>
           </p>
         </div>
@@ -110,7 +111,7 @@ export function LearnToEarn() {
                 <h4 className="font-bold text-gray-900 mb-2">1. J'apprends</h4>
                 <p className="text-gray-600 text-sm">Je suis des formations et réussis des quiz</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-8 h-8 text-white" />
@@ -118,7 +119,7 @@ export function LearnToEarn() {
                 <h4 className="font-bold text-gray-900 mb-2">2. Je gagne des iKNO</h4>
                 <p className="text-gray-600 text-sm">Crédits internes utilisables immédiatement</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
@@ -126,7 +127,7 @@ export function LearnToEarn() {
                 <h4 className="font-bold text-gray-900 mb-2">3. Je valide mon profil</h4>
                 <p className="text-gray-600 text-sm">KYC pour transformer mes iKNO en $KNO</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Coins className="w-8 h-8 text-white" />
@@ -135,7 +136,7 @@ export function LearnToEarn() {
                 <p className="text-gray-600 text-sm">Tokens officiels échangeables sur DEX/CEX</p>
               </div>
             </div>
-            
+
             <div className="mt-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -186,16 +187,14 @@ export function LearnToEarn() {
           <h3 className="text-2xl font-bold text-center text-gray-900 mb-12">
             3 étapes simples
           </h3>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {steps.map((step, index) => {
               const Icon = step.icon
               return (
-                <div 
+                <div
                   key={index}
-                  className={`relative bg-white rounded-2xl p-8 shadow-xl border-2 transition-all duration-300 cursor-pointer ${
-                    activeStep === index ? 'border-purple-300 shadow-2xl' : 'border-gray-100 hover:border-purple-200'
-                  }`}
+                  className={`relative bg-white rounded-2xl p-8 shadow-xl border-2 transition-all duration-300 cursor-pointer ${activeStep === index ? 'border-purple-300 shadow-2xl' : 'border-gray-100 hover:border-purple-200'}`}
                   onClick={() => setActiveStep(index)}
                 >
                   {/* Step Number */}
@@ -271,6 +270,6 @@ export function LearnToEarn() {
           </div>
         </div>
       </div>
-    </section>
+    </section></>
   )
 }

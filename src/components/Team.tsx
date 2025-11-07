@@ -123,7 +123,7 @@ export function Team() {
         </div>
 
         {/* Advisors */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        {/* <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Conseillers Stratégiques
           </h3>
@@ -137,10 +137,10 @@ export function Team() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Join Team CTA */}
-        <div className="text-center mt-16">
+        {/* <div className="text-center mt-16">
           <div className="bg-gradient-to-r from-purple-500 to-blue-600 rounded-2xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-4">
               Rejoignez notre équipe !
@@ -153,7 +153,7 @@ export function Team() {
               Voir les postes ouverts
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   )

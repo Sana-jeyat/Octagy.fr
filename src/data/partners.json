@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "name": "ONEDYS FORMATION",
+    "logourl": "/partners/onedys.png",
+    "url": "https://onedys.fr/"
+  },
+  {
+    "id": 2,
+    "name": "Health performance",
+    "logourl": "/partners/health.png",
+    "url": "https://healthperformance.fr/"
+  },
+  {
+    "id": 3,
+    "name": "Apteed",
+    "logourl": "/partners/apteed.png",
+    "url": "https://apteed.fr/"
+  },
+  {
+    "id": 4,
+    "name": "France - Prévention - Secourisme",
+    "logourl": "/partners/fps.png",
+    "url": "https://fps95.com/contact/"
+  },
+  {
+    "id": 5,
+    "name": "Private French University",
+    "logourl": "/partners/french.png",
+    "url": "https://myfrenchuniversity.fr/"
+  }, 
+  {
+    "id": 6,
+    "name": "Octagy",
+    "logourl": "/partners/octagy.png",
+    "url": "https://octagy.fr/"
+  }
+
+]
+  

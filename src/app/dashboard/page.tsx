@@ -1,21 +1,101 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { DailyStreak } from '@/components/DailyStreak'
 import { 
   BookOpen, Users, Wallet, User, TrendingUp, Award, Clock, Star, ChevronRight, Play, Trophy, Target, Zap, Brain, Flame, Globe, Shield, Menu, X, Heart, Stethoscope, Code, Briefcase, Palette, Calculator, Wrench, GraduationCap, Building, Leaf, Settings, Bell, Search, Filter, BarChart3, PieChart, Activity, Calendar, CheckCircle, ArrowUp, ArrowDown, Plus, Minus, RefreshCw, Download, Upload, Share2, Bookmark, MessageCircle, ThumbsUp, Eye, Headphones, Video, FileText, Image, Mic, Coins, AlertCircle, Camera, Lock, Unlock, UserPlus, Crown, Gift, Link, Copy, Youtube, Instagram, Facebook, ToggleLeft, ToggleRight, Gamepad2, Layers, Users2, Medal, Sparkles, Timer, Focus, Smartphone, Monitor, Tv, Radio, Volume2, VolumeX, FastForward, Rewind, Pause, SkipForward, SkipBack, RotateCcw, RotateCw, Maximize, Minimize, ExternalLink, Home, MapPin, Phone, Mail, Hash, AtSign, DollarSign, Percent, Slash, Delete, Edit, Edit2, Edit3, Save, FileEdit, FilePlus, FileX, Folder, FolderOpen, FolderPlus, Archive, Trash, Trash2, MoreHorizontal, MoreVertical, ChevronUp, ChevronDown, ChevronLeft, ChevronsUp, ChevronsDown, ChevronsLeft, ChevronsRight, ArrowLeft, ArrowRight, ArrowUpRight, ArrowDownRight, ArrowDownLeft, ArrowUpLeft, Move, MoveHorizontal, MoveVertical, CornerDownLeft, CornerDownRight, CornerUpLeft, CornerUpRight, MousePointer, MousePointer2, Navigation, Navigation2, Compass, Map, Car, Bike, Bus, Train, Plane, Ship, Truck, Fuel, Battery, BatteryLow, Wifi, WifiOff, Signal, SignalHigh, SignalLow, SignalMedium, SignalZero, Bluetooth, BluetoothConnected, BluetoothSearching, Usb, HardDrive, Cpu, MemoryStick, Server, Database, Cloud, CloudRain, CloudSnow, Sun, Moon, Sunrise, Sunset, CloudDrizzle, CloudLightning, Thermometer, Droplets, Wind, EyeOff, Glasses, Lightbulb, Flashlight, Lamp, LampCeiling, LampDesk, LampFloor, LampWallDown, LampWallUp, Power, PowerOff, Plug, Plug2, PlugZap, BatteryCharging, BatteryFull, Gauge, HeartPulse, HeartHandshake, HeartCrack, HeartOff, Smile, Frown, Meh, Laugh, Angry, Annoyed
 } from 'lucide-react'
 
+import MyCourse from '@/components/MyCourse'
+import MyTransactions from '@/components/MyTransactions'
+import ProfilePage from '@/components/ProfilePage'
+import { useWallet } from '@/context/WalletContext'
+
+import axios from 'axios';
+import axiosInstance from '@/context/axiosInstance'
+
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AuthContext } from '@/context/AuthContext'
+export interface UserProfile {
+  id?: number
+  email?: string
+  roles?: string[]
+  firstName?: string | null
+  lastName?: string | null
+  phoneNumber?: string | null
+  nationality?: string | null
+  birthDate?: string | null // ISO date string
+  profileImage?: string | null
+  provider?: string | null
+  providerId?: string | null
+  isVerified?: boolean
+  createdAt?: string // ISO date string
+  resetToken?: string | null
+  resetTokenExpiresAt?: string | null // ISO date string
+  moodleId?: number | null
+  is2faEnabled?: boolean
+  totpSecret?: string | null
+  knoTokens?: number
+  isTrainer?: boolean
+  isGuest?: boolean
+  address?: string | null
+  hasCompletedSurvey?: boolean
+
+}
+
+type TokenResponse = {
+  knoTokens: number
+}
+
+interface UserStats {
+  time_spent_minutes: number;
+  daily_time_goal: number;
+  quiz_completed: number;
+  quiz_passed: number;
+  daily_quiz_goal: number;
+  badges_earned_today: number;
+}
+
+
+export interface Course {
+  id: number
+  moodleId: number
+  fullname: string
+  shortname?: string
+  summary?: string
+  courseimage?: string
+  clicks: number
+  fiatPrice?: number
+  progress:number
+  knoPrice?: number
+  category?: string
+  createdBy?: {
+    id: number
+    name: string
+    avatar?: string
+  }
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [profileMode, setProfileMode] = useState<'personal' | 'professional'>('personal')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [knoBalance, setKnoBalance] = useState(1247.5)
-  const [iknoBalance, setIknoBalance] = useState(2847.3)
+  // const [knoBalance, setKnoBalance] = useState(1247.5)
+  const [iknoBalance, setIknoBalance] = useState<number | null>(null)
+  
   const [kycStatus, setKycStatus] = useState<'not_started' | 'pending' | 'approved' | 'rejected'>('not_started')
   const [learningTime, setLearningTime] = useState(156)
   const [dailyStreak, setDailyStreak] = useState(7)
   const [weeklyScore, setWeeklyScore] = useState(2847)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [courses, setCourses] = useState<Course[]>([]);
+  const completedCoursesCount = courses.filter(course => course.progress >= 100).length;
+  const [stats, setStats] = useState<UserStats | null>(null);
+
+
+  
   
   // Nouvelles fonctionnalités
   const [avatarMode, setAvatarMode] = useState<'personal' | 'professional'>('personal')
@@ -35,6 +115,13 @@ export default function Dashboard() {
   const [autoDonationEnabled, setAutoDonationEnabled] = useState(false)
   const [autoDonationPercentage, setAutoDonationPercentage] = useState(5)
   const [showDonationModal, setShowDonationModal] = useState(false)
+  
+   const { user} = useContext(AuthContext);
+  const { knoBalance, address } = useWallet()
+  const [successCount, setSuccessCount] = useState<number | null>(null)
+
+  
+
 
   // KYC state
   const [showKycModal, setShowKycModal] = useState(false)
@@ -56,79 +143,156 @@ export default function Dashboard() {
     avgRating: 4.8
   })
 
-  const [userProfile, setUserProfile] = useState({
-    name: 'Alex Thompson',
-    profession: 'Pharmacien',
-    interests: ['Santé', 'Blockchain', 'IA'],
-    level: 'Intermédiaire',
-    goals: ['Certification', 'Reconversion', 'Spécialisation'],
-    personalAvatar: '👨‍💻',
-    professionalAvatar: '👔',
-    joinDate: '2024-09-15',
-    completedCourses: 12,
-    totalHours: 156,
-    rank: 5,
-    company: 'TechCorp SA',
-    department: 'R&D',
-    manager: 'Sophie Martin',
-    referralCode: 'KNO-ALEX-2025',
-    referralCount: 3,
-    referralEarnings: 150,
-    companyObjectives: [
-      { title: 'Certification Blockchain', progress: 65, deadline: '2025-02-15', reward: '€500 + 100 $KNO' },
-      { title: 'Formation IA Équipe', progress: 40, deadline: '2025-03-01', reward: 'Team Building' },
-      { title: 'Modules Santé Obligatoires', progress: 80, deadline: '2025-01-31', reward: 'Prime Sécurité' }
-    ],
-    partnerCourses: [
-      {
-        id: 1,
-        partner: 'OCTAGY',
-        partnerLogo: '🏥',
-        courseName: 'AFGSU2 - Urgences vitales en pharmacie',
-        progress: 75,
-        totalHours: 12,
-        completedHours: 9,
-        status: 'en_cours',
-        certificate: null,
-        lastActivity: '2025-01-15',
-        category: 'Santé',
-        rewards: { kno: 50, knobro: 25 }
-      },
-      {
-        id: 2,
-        partner: 'Université de Genève',
-        partnerLogo: '🎓',
-        courseName: 'Pharmacologie Clinique Avancée',
-        progress: 100,
-        totalHours: 45,
-        completedHours: 45,
-        status: 'termine',
-        certificate: 'https://certificates.unige.ch/pharm-2024-001.pdf',
-        lastActivity: '2025-01-10',
-        category: 'Sciences',
-        rewards: { kno: 150, knobro: 75 }
+
+
+
+
+
+  const imageSrc =
+  (user?.profileImage
+    ? user.profileImage.startsWith("data:image") 
+      ? user.profileImage
+      : /^https?:\/\//.test(user.profileImage) 
+      ? user.profileImage
+      : `https://auth.kno.academy/be${user.profileImage}` 
+    : "/default-avatar.png"); 
+
+  const getToken = () => {
+  if (typeof window !== 'undefined') {
+    
+    return localStorage.getItem('token');
+  }
+  return null; 
+};
+
+const token = getToken();
+
+ const router = useRouter();
+
+   const handleProfessionalClick = () => {
+    setProfileMode('professional');
+    router.replace('/entreprise')
+   
+    
+ 
+  };
+
+  useEffect(() => {
+    axiosInstance.get('/moodle/user-stats')
+      .then(res => {
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      })
+      .catch(err => {
+        console.error("Erreur récupération stats Moodle", err);
+      });
+  }, []);
+  
+   const {
+    time_spent_minutes,
+    daily_time_goal,
+    quiz_completed,
+    quiz_passed,
+    daily_quiz_goal,
+    badges_earned_today,
+  } = stats || {};
+
+useEffect(() => {
+  axiosInstance.get('/moodle/my-recent-courses')
+    .then(res => {
+      if (res.data.success && res.data.data?.recent_courses) {
+        setCourses(res.data.data.recent_courses);
       }
-    ]
-  })
+    })
+    .catch(err => {
+      console.error("Erreur lors du chargement des cours récents :", err);
+    });
+}, []);
+
+
+
+
+
+useEffect(() => {
+  const fetchSuccessfulQuizzes = async () => {
+    try {
+      if (!user?.id) throw new Error('ID utilisateur non défini');
+
+      // ✅ Appel via axiosInstance (cookies inclus automatiquement)
+      const res = await axiosInstance.get(`/quizzes/users/${user.id}/quizzes`);
+
+      const data = res.data;
+
+      if (!Array.isArray(data)) {
+        console.error('Réponse inattendue:', data);
+        return;
+      }
+
+      const successfulQuizzes = data.filter((quiz) => quiz.result === 100);
+      setSuccessCount(successfulQuizzes.length);
+    } catch (err) {
+      console.error('Erreur API quiz:', err);
+      setSuccessCount(null);
+    }
+  };
+
+  if (user?.id) {
+    fetchSuccessfulQuizzes();
+  }
+}, [user?.id]);
+
+useEffect(() => {
+  const fetchBalance = async () => {
+    setLoading(true)
+    setError(false)
+
+    try {
+      if (!user?.id) throw new Error('ID utilisateur non défini')
+
+      // ✅ Requête avec cookie automatique
+      const res = await axiosInstance.get(`/user/${user.id}/tokens`)
+
+      console.log('[API Token Balance Response]', res.data)
+      setIknoBalance(res.data.knoTokens)
+    } catch (err) {
+      console.error('Erreur de récupération du solde iKNO:', err)
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (user?.id) {
+    fetchBalance()
+  }
+}, [user?.id])
+
+
+
+
+ 
 
   const navigation = [
     { name: 'Dashboard', id: 'dashboard', icon: TrendingUp },
-    { name: 'Streaks', id: 'streak', icon: Flame },
+    { name: 'Profil', id: 'profile', icon: User },
     { name: 'Cours', id: 'courses', icon: BookOpen },
-    { name: 'Formations Partenaires', id: 'partners', icon: Building },
+    { name: 'Transactions', id: 'transactions', icon: Wallet },
+    //  { name: 'Streaks', id: 'streak', icon: Flame },
+    // { name: 'Formations Partenaires', id: 'partners', icon: Building },
     { name: 'Ligues & Clubs', id: 'leagues', icon: Trophy },
+     
+   
     { name: 'Réseaux Sociaux', id: 'social', icon: Smartphone },
     { name: 'Parrainage', id: 'referral', icon: Users2 },
     { name: 'Solidarité', id: 'solidarity', icon: Heart },
     { name: 'Créateur', id: 'creator', icon: Video },
-    { name: 'Communauté', id: 'community', icon: Users },
-    { name: 'Wallet / Récompenses', id: 'wallet', icon: Wallet },
-    { name: 'Profil', id: 'profile', icon: User },
+    // { name: 'Communauté', id: 'community', icon: Users },
+    // { name: 'Wallet / Récompenses', id: 'wallet', icon: Wallet },
+    
   ]
 
-  const getCurrentAvatar = () => {
-    return avatarMode === 'personal' ? userProfile.personalAvatar : userProfile.professionalAvatar
-  }
+
 
   const renderDashboard = () => {
     return (
@@ -148,17 +312,17 @@ export default function Dashboard() {
                 <User className="w-5 h-5" />
                 <span>Personnel</span>
               </button>
-              <button
-                onClick={() => setProfileMode('professional')}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-                  profileMode === 'professional'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-blue-600'
-                }`}
-              >
-                <Briefcase className="w-5 h-5" />
-                <span>Professionnel</span>
-              </button>
+             <button
+              onClick={handleProfessionalClick} 
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                profileMode === 'professional'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              <Briefcase className="w-5 h-5" />
+              <span>Professionnel</span>
+            </button>
             </div>
           </div>
         </div>
@@ -189,8 +353,8 @@ export default function Dashboard() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{Math.round(currentTimeProgress)}min</div>
-                    <div className="text-xs text-gray-500">/ {dailyTimeGoal}min</div>
+                   <div className="text-2xl font-bold">{time_spent_minutes}min</div>
+                <div className="text-xs text-gray-500">/ {daily_time_goal}min</div>
                   </div>
                 </div>
               </div>
@@ -221,8 +385,8 @@ export default function Dashboard() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{currentQuizProgress}</div>
-                    <div className="text-xs text-gray-500">/ {dailyQuizGoal} quiz</div>
+              <div className="text-2xl font-bold">{quiz_completed} / {daily_quiz_goal}</div>
+                <div className="text-xs text-gray-500">Quiz réalisés</div>
                   </div>
                 </div>
               </div>
@@ -242,7 +406,11 @@ export default function Dashboard() {
                 <span>+12%</span>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{Math.floor(learningTime)}h</div>
+          
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+  {Math.floor(time_spent_minutes ?? 0)}min
+</div>
+
             <div className="text-gray-600 text-sm">Temps total</div>
           </div>
 
@@ -256,7 +424,7 @@ export default function Dashboard() {
                 <span>+3</span>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{userProfile.completedCourses}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{completedCoursesCount}</div>
             <div className="text-gray-600 text-sm">Cours terminés</div>
           </div>
 
@@ -270,7 +438,9 @@ export default function Dashboard() {
                 <span>+8</span>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">47</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+    {successCount !== null ? successCount : '...'}
+  </div>
             <div className="text-gray-600 text-sm">Quiz réussis</div>
           </div>
 
@@ -284,58 +454,62 @@ export default function Dashboard() {
                 <span>+2</span>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">15</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">0</div>
             <div className="text-gray-600 text-sm">Badges obtenus</div>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <h3 className="text-xl font-bold mb-6">Activité Récente</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <div>
-                  <div className="font-semibold">Blockchain Fundamentals</div>
-                  <div className="text-sm text-gray-600">Cours terminé</div>
+  <div className="bg-white rounded-2xl p-6 shadow-lg">
+      <h3 className="text-xl font-bold mb-6">Cours récents</h3>
+
+      <div className="space-y-4">
+        {courses.map(course => (
+          <div
+            key={course.id}
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+          >
+            <div className="flex items-center space-x-4">
+              <img
+                src={course.courseimage || '/default-course.png'}
+                alt={course.fullname}
+                className="w-8 h-8 rounded-md object-cover"
+              />
+              <div>
+                <div className="font-semibold">{course.fullname}</div>
+                <div className="text-sm text-gray-600">
+                  {course.summary?.replace(/<[^>]+>/g, '').slice(0, 80) + '...'}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-semibold text-green-600">+45 iKNO</div>
-                <div className="text-xs text-gray-500">2h</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-              <div className="flex items-center space-x-4">
-                <Target className="w-5 h-5 text-purple-500" />
-                <div>
-                  <div className="font-semibold">Quiz IA Médicale</div>
-                  <div className="text-sm text-gray-600">Quiz réussi (95%)</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-semibold text-green-600">+20 iKNO</div>
-                <div className="text-xs text-gray-500">4h</div>
-              </div>
-            </div>
+            <div className="text-right w-32">
+  {course.progress !== null ? (
+    <>
+      <div className="text-sm font-semibold text-green-600 mb-1">
+        {course.progress}% complété
+      </div>
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-green-500"
+          style={{ width: `${course.progress}%` }}
+        ></div>
+      </div>
+    </>
+  ) : (
+    <>
+      <div className="text-sm text-gray-500 mb-1">En cours</div>
+      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-full bg-purple-400 animate-pulse w-1/3"></div>
+      </div>
+    </>
+  )}
+</div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-              <div className="flex items-center space-x-4">
-                <Award className="w-5 h-5 text-yellow-500" />
-                <div>
-                  <div className="font-semibold">Badge Marathonien</div>
-                  <div className="text-sm text-gray-600">Badge obtenu</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-semibold text-green-600">+25 iKNO</div>
-                <div className="text-xs text-gray-500">1j</div>
-              </div>
-            </div>
           </div>
-        </div>
+        ))}
+      </div>
+    </div>
       </div>
     )
   }
@@ -363,204 +537,15 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {isCreatorMode && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-blue-50 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-blue-600">{creatorStats.totalStudents.toLocaleString()}</div>
-                <div className="text-sm text-blue-700">Étudiants formés</div>
-              </div>
-              <div className="bg-green-50 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-green-600">{creatorStats.totalViews.toLocaleString()}</div>
-                <div className="text-sm text-green-700">Vues totales</div>
-              </div>
-              <div className="bg-purple-50 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-purple-600">{creatorStats.totalRevenue.toLocaleString()} iKNO</div>
-                <div className="text-sm text-purple-700">Revenus totaux</div>
-              </div>
-            </div>
-          )}
+  
         </div>
 
-        {isCreatorMode && (
-          <>
-            {/* Creator Spotlight */}
-            <div className="bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-2xl p-8 text-white shadow-2xl mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                    <Crown className="w-8 h-8 text-yellow-200" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold">🌟 Créateur en Vedette</h3>
-                    <p className="text-orange-100">Vous êtes mis en avant cette semaine !</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold">+347%</div>
-                  <div className="text-orange-100 text-sm">Vues cette semaine</div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white/10 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold">2,847</div>
-                  <div className="text-orange-100 text-sm">Nouveaux étudiants</div>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold">15.6K</div>
-                  <div className="text-orange-100 text-sm">Vues cette semaine</div>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold">1,247</div>
-                  <div className="text-orange-100 text-sm">Tips reçus</div>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold">#4</div>
-                  <div className="text-orange-100 text-sm">Classement global</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Creator Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6 rounded-2xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg">
-                <Upload className="w-8 h-8 mx-auto mb-3" />
-                <div className="font-semibold">Nouveau Contenu</div>
-                <div className="text-xs text-blue-100 mt-1">Vidéo, Quiz, Cours</div>
-              </button>
-
-              <button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-2xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg">
-                <BarChart3 className="w-8 h-8 mx-auto mb-3" />
-                <div className="font-semibold">Analytics</div>
-                <div className="text-xs text-green-100 mt-1">Vues, Revenus, Taux</div>
-              </button>
-
-              <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg">
-                <Gift className="w-8 h-8 mx-auto mb-3" />
-                <div className="font-semibold">Tips Reçus</div>
-                <div className="text-xs text-purple-100 mt-1">1,247 iKNO ce mois</div>
-              </button>
-
-              <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg">
-                <Share2 className="w-8 h-8 mx-auto mb-3" />
-                <div className="font-semibold">Partager</div>
-                <div className="text-xs text-orange-100 mt-1">Réseaux sociaux</div>
-              </button>
-            </div>
-
-            {/* Creator Courses */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold">Mes Formations</h3>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouvelle Formation
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="border border-gray-200 rounded-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h4 className="text-lg font-semibold">Blockchain pour Débutants</h4>
-                      <p className="text-gray-600">Formation premium • 49 iKNO</p>
-                    </div>
-                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                      Publié
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-4 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-bold text-blue-600">234</div>
-                      <div className="text-xs text-gray-500">Étudiants</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-green-600">4.9★</div>
-                      <div className="text-xs text-gray-500">Note</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-purple-600">1,156</div>
-                      <div className="text-xs text-gray-500">iKNO gagnés</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-orange-600">87%</div>
-                      <div className="text-xs text-gray-500">Complétion</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h4 className="text-lg font-semibold">Introduction aux Cryptomonnaies</h4>
-                      <p className="text-gray-600">Formation gratuite</p>
-                    </div>
-                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                      Publié
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-4 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-bold text-blue-600">567</div>
-                      <div className="text-xs text-gray-500">Étudiants</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-green-600">4.7★</div>
-                      <div className="text-xs text-gray-500">Note</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-purple-600">234</div>
-                      <div className="text-xs text-gray-500">iKNO gagnés</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-orange-600">92%</div>
-                      <div className="text-xs text-gray-500">Complétion</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Creator Badges */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="text-xl font-bold mb-6">Badges Créateur</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-                  <div className="text-3xl mb-2">🏆</div>
-                  <h4 className="font-bold text-yellow-800">Top Créateur</h4>
-                  <p className="text-sm text-yellow-700">1000+ étudiants formés</p>
-                  <span className="inline-block mt-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                    ✓ Obtenu
-                  </span>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
-                  <div className="text-3xl mb-2">🚀</div>
-                  <h4 className="font-bold text-blue-800">Formateur Viral</h4>
-                  <p className="text-sm text-blue-700">10K+ vues cumulées</p>
-                  <span className="inline-block mt-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                    ✓ Obtenu
-                  </span>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
-                  <div className="text-3xl mb-2">⭐</div>
-                  <h4 className="font-bold text-purple-800">Pionnier KNO</h4>
-                  <p className="text-sm text-purple-700">100 premiers créateurs</p>
-                  <span className="inline-block mt-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                    ✓ Obtenu
-                  </span>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+    
       </div>
     )
-      {/* KYC Modal */}
-      {renderKycModal()}
+    
+      renderKycModal()
+
 
   }
 
@@ -881,10 +866,18 @@ export default function Dashboard() {
       <div className="lg:hidden bg-white shadow-sm p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">{getCurrentAvatar()}</div>
+          <img
+  src={user?.profileImage ?? '/placeholder-image.jpg'} 
+  alt="Profil"
+  className="w-32 h-32 rounded-full"
+/>
+
+
+
+
             <div>
-              <div className="font-semibold">{userProfile.name}</div>
-              <div className="text-sm text-gray-500">{userProfile.profession}</div>
+              <div className="font-semibold">{user?.firstName}</div>
+              <div className="text-sm text-gray-500">{user?.lastName}</div>
             </div>
           </div>
           <button
@@ -900,13 +893,33 @@ export default function Dashboard() {
         {/* Sidebar */}
         <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out`}>
           <div className="p-6">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="text-3xl">{getCurrentAvatar()}</div>
-              <div>
-                <div className="font-bold text-lg">{userProfile.name}</div>
-                <div className="text-sm text-gray-500">{userProfile.profession}</div>
-              </div>
-            </div>
+<div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-3">
+  <div className="relative w-24 h-24 mb-3">
+    <img
+      src={imageSrc}
+      alt="Photo de profil"
+      className="w-full h-full object-cover rounded-full border-2 border-purple-600 shadow-md"
+      referrerPolicy="no-referrer"
+      onError={(e) => {
+        e.currentTarget.onerror = null;
+        e.currentTarget.src = "/default-avatar.png";
+      }}
+    />
+    <span className="absolute bottom-1 right-1 bg-green-400 w-4 h-4 rounded-full border-2 border-white" />
+  </div>
+
+<h2 className="text-lg font-semibold text-gray-800 text-center tracking-wide">
+  {user?.firstName || "Utilisateur"}
+</h2>
+<p className="text-sm text-gray-500">{user?.email || ""}</p>
+
+
+
+   
+    
+ 
+</div>
+
 
             {/* Balance Cards */}
             <div className="space-y-3 mb-8">
@@ -915,13 +928,14 @@ export default function Dashboard() {
                   <span className="text-sm opacity-90">iKNO (Crédits)</span>
                   <Coins className="w-4 h-4" />
                 </div>
-                <div className="text-2xl font-bold">{iknoBalance.toFixed(1)}</div>
+                <div className="text-2xl font-bold">{iknoBalance}</div>
                 <div className="text-xs opacity-75">Utilisables immédiatement</div>
               </div>
 
               <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-4 text-white">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm opacity-90">$KNO (Tokens)</span>
+                  
                   <button
                     onClick={() => kycStatus !== 'approved' && setShowKycModal(true)}
                     className={`px-2 py-1 rounded-full text-xs cursor-pointer hover:opacity-80 transition-opacity ${
@@ -934,7 +948,7 @@ export default function Dashboard() {
                   </button>
                 </div>
                 <div className="text-2xl font-bold">
-                  {kycStatus === 'approved' ? knoBalance.toFixed(1) : '---'}
+                  {knoBalance?.toFixed(1)}
                 </div>
                 <div className="text-xs opacity-75">
                   {kycStatus === 'approved' ? 'Échangeables' : 
@@ -976,13 +990,14 @@ export default function Dashboard() {
             {activeTab === 'streak' && <DailyStreak />}
             {activeTab === 'solidarity' && renderSolidarity()}
             {activeTab === 'creator' && renderCreator()}
-            {activeTab === 'courses' && (
-              <div className="text-center py-16">
-                <BookOpen className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-                <h3 className="text-2xl font-semibold text-gray-600 mb-4">Catalogue de Cours</h3>
-                <p className="text-gray-500">Cette section sera bientôt disponible.</p>
-              </div>
-            )}
+            {activeTab === 'courses' && <MyCourse />}
+            {activeTab === 'transactions' && <MyTransactions />}
+            {activeTab === 'profile' && user?.id && (
+  <ProfilePage userId={user.id} />
+)}
+
+
+
             {activeTab === 'wallet' && (
               <div className="text-center py-16">
                 <Wallet className="w-20 h-20 text-gray-300 mx-auto mb-6" />
@@ -990,14 +1005,8 @@ export default function Dashboard() {
                 <p className="text-gray-500">Cette section sera bientôt disponible.</p>
               </div>
             )}
-            {activeTab === 'profile' && (
-              <div className="text-center py-16">
-                <User className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-                <h3 className="text-2xl font-semibold text-gray-600 mb-4">Profil Utilisateur</h3>
-                <p className="text-gray-500">Cette section sera bientôt disponible.</p>
-              </div>
-            )}
-            {!['dashboard', 'streak', 'solidarity', 'creator', 'courses', 'wallet', 'profile'].includes(activeTab) && (
+            
+            {!['dashboard', 'streak', 'solidarity', 'creator', 'courses', 'wallet', 'transactions', 'profile'].includes(activeTab) && (
               <div className="text-center py-16">
                 <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center">
                   <span className="text-2xl">🚧</span>
