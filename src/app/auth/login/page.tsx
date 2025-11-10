@@ -72,7 +72,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   const handleGoogleLogin = () => {
-    window.location.href = "${process.env.APP_API_URL}/connect/google";
+    window.location.href = `${process.env.NEXT_PUBLIC_APP_API_URL}/connect/google`;
   };
 
 

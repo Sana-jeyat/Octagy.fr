@@ -100,14 +100,14 @@ const sendEmail = async (e: React.FormEvent) => {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-3 mb-6">
               <div className="w-100 h-10 rounded-xl overflow-hidden">
-  <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+  <img src="/logo-octagy.png" alt="Logo" className="w-44 h-16 object-cover" />
   
 </div>
             </Link>
             
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              La première plateforme Learn-to-Earn qui transforme votre apprentissage en récompenses concrètes. 
-              Développez vos compétences, gagnez des tokens KNO.
+            <p className="text-gray-300 mb-6 leading-relaxed text-justify">
+              Octagy se positionne comme le partenaire privilégié des professionnels de santé en leur offrant des formations de qualité, conçues par des experts reconnus. 
+              Avec une approche sur-mesure, nous accompagnons chaque apprenants dans l’optimisation de ses compétences et de sa pratique.
             </p>
 
             <div className="flex space-x-4">
@@ -264,17 +264,17 @@ const sendEmail = async (e: React.FormEvent) => {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2025 Knowledge Process SA. Tous droits réservés.
+            © 2025 Octagy. Tous droits réservés.
           </p>
           
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>Powered by Polygon</span>
+              <span>Powered by Octagy</span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              <span>Genève, Suisse</span>
+              <span>Cergy, France</span>
             </div>
           </div>
         </div>

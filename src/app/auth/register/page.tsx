@@ -267,7 +267,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Pour debug : voir les données envoyées
     console.log([...data.entries()]);
 
-    const response = await fetch('${process.env.APP_API_URL}/register', {
+    const response = await fetch(process.env.NEXT_PUBLIC_APP_API_URL +'/register', {
       method: "POST",
       body: data, // ✅ pas de JSON.stringify !
       credentials: "include",
@@ -305,7 +305,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     setIsLoading(false);
 
     setTimeout(() => {
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     }, 1500);
   } catch (error) {
     console.error("Erreur lors de l'inscription", error);

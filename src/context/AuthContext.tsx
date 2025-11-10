@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('https://auth.kno.academy/be/api/me', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL}/me`, {
           credentials: 'include', 
         });
 
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
  
 const login = async (email: string, password: string) => {
   try {
-    const response = await fetch('https://auth.kno.academy/be/api/login', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -99,7 +99,7 @@ const login = async (email: string, password: string) => {
   // 🚪 Déconnexion
   const logout = async () => {
     try {
-      await fetch('https://auth.kno.academy/be/api/logout', {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL}/logout`, {
         method: 'POST',
         credentials: 'include', // ✅ pour supprimer le cookie côté serveur
       });
@@ -116,7 +116,7 @@ const login = async (email: string, password: string) => {
   // 🔄 Rafraîchissement de session
   const refreshTokens = async () => {
     try {
-      const response = await fetch('https://auth.kno.academy/be/api/refresh', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL}/refresh`, {
         method: 'POST',
         credentials: 'include',
       });

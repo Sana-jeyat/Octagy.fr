@@ -63,35 +63,35 @@ export function Hero() {
         {activeAudience === 'students' && (
           <div className="mx-auto max-w-4xl text-center">
             {/* Badge */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
               <span className="inline-flex items-center space-x-2 bg-gradient-to-r from-pink-100 to-purple-100 px-4 py-2 rounded-full text-sm font-semibold text-purple-700 border border-purple-200">
                 <Flame className="w-4 h-4 text-orange-500" />
                 <span>Apprends • Joue • Gagne</span>
               </span>
-            </div>
+            </div> */}
 
             {/* Main heading */}
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">
               <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                Transforme
+                À la recherche
               </span>
               <br />
               <span className="text-gray-900">
-                ton temps d'écran
+                d'une formation
               </span>
               <br />
               <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                en récompenses !
+               spécialisée?
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-              La première plateforme qui transforme ton temps d'écran en apprentissage rémunéré. 
-              <strong className="text-purple-600">3 clics maximum</strong> pour commencer à gagner !
+              Octagy est là pour vous servir ! Découvrez  
+              <strong className="text-purple-600">+ de 200 formations</strong> pour dynamiser votre parcours professionnel.
             </p>
 
             {/* Quick Access Actions */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-12 shadow-xl border border-white/50">
+            {/* <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-12 shadow-xl border border-white/50">
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Accès rapide</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Link href="/courses" className="flex flex-col items-center p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors">
@@ -111,10 +111,10 @@ export function Hero() {
                   <span className="text-sm font-semibold text-orange-900">Wallet</span>
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link
                 href="/dashboard"
                 className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-xl hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
@@ -127,7 +127,7 @@ export function Hero() {
                 <Play className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                 Voir comment ça marche
               </button>
-            </div>
+            </div> */}
 
             {/* Gamification Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">

@@ -41,7 +41,7 @@ export default function RootLayout({
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             {children}
             <Footer />
-            <Chatbot/>
+            {/* <Chatbot/> */}
           </WalletProvider>
         </AuthProvider>
       </body>
