@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const res = await fetch('${process.env.APP_API_URL}/reset-password/request', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL}/reset-password/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email }),

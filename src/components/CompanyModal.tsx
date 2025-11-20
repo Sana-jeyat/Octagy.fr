@@ -3,16 +3,13 @@ import { createPortal } from "react-dom";
 import { Building, Users, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-
-
 interface OwnerData {
-  gender: string; 
+  gender: string;
   firstName: string;
   lastName: string;
   personalEmail: string;
   mobilePhone: string;
 }
-
 
 interface CompanyModalProps {
   show: boolean;
@@ -133,33 +130,31 @@ const CompanyModal: React.FC<CompanyModalProps> = ({
               <Users className="w-5 h-5" /> Responsable de l’entreprise
             </h3>
             <div className="space-y-3">
-           <div className="flex gap-6">
-  <label className="flex items-center gap-2 cursor-pointer">
-    <input
-      type="radio"
-      name="gender"
-      value="M"
-      checked={ownerData.gender === "M"}
-      onChange={handleOwnerChange}
-      className="text-purple-500 focus:ring-purple-400"
-    />
-    <span>Monsieur</span>
-  </label>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="M"
+                    checked={ownerData.gender === "M"}
+                    onChange={handleOwnerChange}
+                    className="text-purple-500 focus:ring-purple-400"
+                  />
+                  <span>Monsieur</span>
+                </label>
 
-  <label className="flex items-center gap-2 cursor-pointer">
-    <input
-      type="radio"
-      name="gender"
-      value="F"
-      checked={ownerData.gender === "F"}
-      onChange={handleOwnerChange}
-      className="text-purple-500 focus:ring-purple-400"
-    />
-    <span>Madame</span>
-  </label>
-
- 
-</div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="F"
+                    checked={ownerData.gender === "F"}
+                    onChange={handleOwnerChange}
+                    className="text-purple-500 focus:ring-purple-400"
+                  />
+                  <span>Madame</span>
+                </label>
+              </div>
 
               <input
                 type="text"

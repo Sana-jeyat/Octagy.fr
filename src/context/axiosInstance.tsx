@@ -1,15 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
 //  Création d'une instance axios configurée pour les cookies sécurisés
 const axiosInstance = axios.create({
-  baseURL: 'https://auth.kno.academy/be/api',
+  baseURL: process.env.NEXT_PUBLIC_APP_API_URL,
   withCredentials: true, // indispensable pour envoyer automatiquement les cookies
 });
 
 //  Intercepteur de réponse : si le token est expiré, on tente un refresh automatique
 axiosInstance.interceptors.response.use(
-  response => response,
-  async error => {
+  (response) => response,
+  async (error) => {
     const originalRequest = error.config;
 
     // Si la session a expiré (401) et qu'on n'a pas encore essayé de refresh
@@ -18,12 +18,16 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Appel au backend pour rafraîchir le cookie (HttpOnly)
-        await axios.post('https://auth.kno.academy/be/api/refresh', {}, { withCredentials: true });
+        await axios.post(
+          `process.env.NEXT_PUBLIC_API_URL/refresh`,
+          {},
+          { withCredentials: true }
+        );
 
         // 🔁 On retente la requête initiale après refresh
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error('Session expirée ou refresh échoué', refreshError);
+        console.error("Session expirée ou refresh échoué", refreshError);
         // On laisse remonter l’erreur : le frontend gèrera la déconnexion
       }
     }

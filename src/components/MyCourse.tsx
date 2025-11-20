@@ -51,7 +51,7 @@ export default function MyCourses() {
 
     try {
       // ✅ Appel direct, cookie envoyé automatiquement
-      const res = await axiosInstance.get('/moodle/my-courses')
+      const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_APP_API_URL}/moodle/my-courses`)
 
       const data = res.data
 
@@ -106,7 +106,7 @@ export default function MyCourses() {
 
 const handleResumeCourse = async (courseId: number) => {
   try {
-    const res = await axiosInstance.get(`/moodle/course/${courseId}`)
+    const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_APP_API_URL}/moodle/course/${courseId}`)
     const encodedUrl = encodeURIComponent(res.data.redirect_url)
     router.push(`/course-viewer?url=${encodedUrl}`)
   } catch (err: any) {
@@ -160,7 +160,7 @@ const handleUnsubscribe = async (courseId: number) => {
 
   try {
     // 🔁 Appel sécurisé avec cookie HttpOnly
-    const res = await axiosInstance.post('/moodle/unenroll-course', {
+    const res = await axiosInstance.post(`${process.env.NEXT_PUBLIC_APP_API_URL}/moodle/unenroll-course`, {
       course_id: courseId,
     })
 
